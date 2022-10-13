@@ -1,0 +1,14 @@
+
+CTRL + L 选择整行
+
+CTRL + SHIFT + K 删除整行
+
+ALT + UP/DOWN 移动选中的行
+
+SHIFT + ALT + UP/DOWN 复制整行
+
+CTRL + D 批量更改变量（多按几次）
+
+CTRL+ENTER 光标在任意位置换行
+
+CTRL + LEFT/RIGHT 光标跳到下一个单词
