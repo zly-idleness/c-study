@@ -22,7 +22,7 @@ int main() {
     transpose_2(a, n);
     output(a, n);
 
-    transpose_3((int*)a, n);
+    transpose_3((int *)a, n);
     output(a, n);
     
     return 0;
@@ -45,7 +45,7 @@ void transpose_3(int *a, int n)
 {
     for (int i = 0; i < n; i++) 
         for (int j = i; j < n; j++)
-            Swap(a + n*i + j, a + n*j + i);
+            Swap(a + N*i + j, a + N*j + i);
 }
 void Swap(int *a, int *b)
 {
