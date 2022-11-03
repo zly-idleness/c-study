@@ -1,4 +1,4 @@
-#include <stdio.h>
+`#include <stdio.h>
 void Print_Fact(int n)
 {
     int a [50] = {1,};//ÓÃÊı×é´¢´æ
