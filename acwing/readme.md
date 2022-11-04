@@ -142,7 +142,7 @@ void insert(int x1,int y1,int x2,int y2,c)
 
 ## 双指针
 
-将O(n?)优化至O(n)
+将O(n^2)优化至O(n)
 
 ```cpp
 
@@ -267,3 +267,244 @@ void merge (vector<PII> &A)
     
     a = res;//交换容器
 }
+
+## 数组模拟链表
+
+```cpp
+
+int val[N],ne[N],idx,head;
+
+void init()
+{
+    idx = 0;
+    head = -1;
+}
+void insert(int k ,int x)
+{
+    val[idx] = x;
+    ne[idx] = ne[k]; 
+    ne[k] = idx++;
+}
+void add_to_head(int x)
+{
+    val[idx] = x;
+    ne[idx] = head;
+    head = idx ++;
+}
+void remove (int k)
+{
+    ne[k] = ne[ne[k]];
+}
+
+```
+
+双链表同理
+
+```cpp
+
+int val[N],l[N],r[N],idx;
+
+r[0] = 1;l[1] = 0;//初始节点
+
+void insert(int a,int x)
+{
+    val[idx] = x;
+    l[idx] = a;
+    r[idx] = r[a];
+    l[r[a]] = idx;
+    r[a] = idx ++;
+}
+
+void remove (int a)
+{
+    l[r[a]] = l[a];
+    r[l[a]] = r[a];
+}
+
+```
+
+## 模拟栈
+
+```cpp
+
+int stk[N],tt = 0;
+
+void push(int x)
+{
+    stk[++tt] = x;
+}
+void pop()
+{
+    tt--;
+}
+bool empty()
+{
+    return tt != 0;
+}
+void query()
+{
+    cout <<stk[tt] <<endl;
+}
+
+```
+
+栈的应用举例
+>给定一个表达式，其中运算符仅包含 +,-,*,/（加 减 乘 整除），可能包含括号，请你求出表达式的最终值。
+
+```cpp
+
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <stack>
+#include <unordered_map>
+
+using namespace std;
+
+stack<int>num;
+satck<char>op;
+
+void eval()
+{
+    auto b = num.top();num.pop();
+    auto a = num.top();num.pop();
+    auto c = op.top();op.pop();
+
+    if(c == '(')return;
+    int x;
+    if(c == '+')
+        x = a + b;
+    else if (c == '-')
+        x = a - b;
+    else if (c == '*')
+        x = a * b;
+    else if(c == '/')
+        x = a / b;
+
+    num.push(x);
+}
+
+int main()
+{
+    unordered_map<char,int>pr = {{'+', 1}, {'-', 1}, {'*', 2}, {'/', 2}};
+
+    //to be complete
+    /*核心思路是
+    1.将数字与运算符分别读入
+    2.贪心的思想,每次读入后只要能计算就计算
+}
+
+```
+
+## 模拟队列
+
+```cpp
+
+int q[N],hh,tt = -1;
+
+
+void push (int x)
+{
+    q[++tt] = x;
+}
+void pop()
+{
+    hh++;
+}
+bool empty()
+{
+    return hh > tt;
+}
+bool query()
+{
+    return q[hh];
+}
+
+```
+
+## 单调栈以及单调队列
+
+核心:只存单调的元素
+
+```cpp
+
+int stk[N],tt;
+
+int main()
+{
+    for(int i = 0;i < n;i ++)//应用在遍历中
+    {
+        int x;cin >> x;
+        while(tt && stk[tt] >= x)
+            tt--;
+        if(!tt)
+            printf("-1");
+        else
+        printf("%d",stk[tt]);//输出第一个比x小的数
+        stk[++tt] = x; 
+    }
+    return 0;
+}
+
+```
+
+滑动窗口
+
+```cpp
+
+int a[N],q[N];
+
+int hh = 0,tt = -1;
+for(int i = 0;i < n;i++>)
+{
+    if(hh <= tt && i - k + 1 > q[hh])//检查q[hh]是否滑出
+        hh++;
+    while(hh <= tt && a[q[tt]] >= a[i])//找第一个符合条件的数
+        tt--;
+    q[++tt] = i;//存入
+    if(i >= k - 1)
+        printf("%d"),a[q[hh]];
+}
+
+```
+
+## kmp算法
+
+应用场景:模式匹配
+>给定一个字符串 S，以及一个模式串 P，所有字符串中只包含大小写英文字母以及阿拉伯数字。
+>模式串 P 在字符串 S 中多次作为子串出现。
+>求出模式串 P 在字符串 S 中所有出现的位置的起始下标。
+
+```cpp
+
+int n,m;
+int ne[N];//对next[ j ] ，是p[ 1, j ]串中前缀和后缀相同的最大长度（部分匹配值）
+char s[M],p[N];
+
+int main()
+{
+    cin >> n>> p+1>> m >> s+1;
+
+    for(int i = 2,j = 0;i <= n;i++)
+    {
+        while(j && p[i] != p[j+1])
+            j = ne[j];
+        if(p[i] == p[j+1])
+            j++;
+        ne[i] = j;
+    }//求出ne数组
+
+    for(int i = 1,j = 0;i <= m;i++)
+    {
+        while(j && s[i] != p[j+1])
+            j = ne[j];
+        if(s[i] == p[j+1])
+            j++;
+        if(j == n)
+        //匹配完毕可以输出
+        printf("%d",i-n);
+    } 
+    return 0;
+}
+
+```
