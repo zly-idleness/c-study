@@ -14,6 +14,9 @@
   - [模拟队列](#模拟队列)
   - [单调栈以及单调队列](#单调栈以及单调队列)
   - [kmp算法](#kmp算法)
+  - [trie树](#trie树)
+  - [并查集](#并查集)
+  - [模拟堆](#模拟堆)
 
 ## 快排
 
@@ -518,4 +521,316 @@ int main()
     return 0;
 }
 
+```
+
+## trie树
+
+```cpp
+使用son数组实现
+数组元素储存当前节点的子节点的索引
+
+int son[N][M],idx,cnt [N];
+char str[N];
+
+void insert (char* str)
+{
+    int p = 0;
+    for(int i = 0 ;str[i];i++)
+    {
+        int u = str[i] - 'a';//因题而异
+        if(!son[p][u])
+            son[p][u] == ++idx;//不存在则创建新节点
+        p = son[p][u];//搜索下一层
+    }
+    cnt[p]++;//到最后记录节点被搜索到的次数
+} 
+int query (char *str)
+{
+    int p = 0;
+    for(int i = 0;str[i];i++)
+    {
+        int u = str[i] - 'a';
+        if(!son[p][u])
+            return 0;
+        p = son[p][u];
+    }
+    return cnt[p];/返回节点被输入的次数
+}
+```  
+
+应用案例
+
+>在给定的 N 个整数 A1，A2……AN 中选出两个进行 xor（异或）运算，得到的结果最大是多少？
+
+```cpp
+int  n,idx;
+int a[N],son[M][2];//二进制表示后下一位只能是0或1
+
+void insert (int x)
+{
+    int p = 0;
+    for(int i = 30;i >= 0;i--)//从最高位开始存储
+    {
+        int &s = son[p][x >> i &1];//提取当前位并映射到树上
+        if(!s)//无该子节点
+            s = ++idx;
+        p = s;
+    }
+}
+
+int search (int x)//贪心
+{
+    int p = 0;
+    int res = 0;
+    for(int i = 30;i >= 0;i--)
+    {
+        int u = x >>i & 1;
+        if(son[p][!u])//存在异或结果
+        {
+            p = son[p][!u];
+            res += 1 << i;
+        }
+        else p = son[p][u]//无奈之举
+    }
+    return res;
+}
+
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+    for (int i = 0; i < n; i++)
+        insert(a[i]);
+    int ans = 0;
+    for (int i = 0; i < n; i++)
+        ans = max(ans, search(a[i]));
+
+    cout << ans << endl;
+    return 0;
+}
+
+```
+
+## 并查集
+
+核心是find函数
+每个集合有唯一的祖宗节点
+ancester数组储存祖宗节点的索引
+
+```cpp
+
+int an[N];
+int find (int x)
+{
+    if(an[x] != x)//祖宗节点的祖宗就是自己
+        an[x] = find(an[x]);
+    return an[x];
+}
+void merge (int a, int b)
+{
+    an[find(a)] = find(b);//将a的祖宗节点连接至b的祖宗节点
+}
+```
+
+应用举例
+>动物王国中有三类动物 A,B,C，这三类动物的食物链构成了有趣的环形。A 吃 B，B 吃 C，C 吃 A。
+>现有 N 个动物，以 1∼N 编号。
+>每个动物都是 A,B,C 中的一种，但是我们并不知道它到底是哪一种。
+>有人用两种说法对这 N 个动物所构成的食物链关系进行描述：
+>第一种说法是 1 X Y，表示 X 和 Y 是同类。第二种说法是 2 X Y，表示 X 吃 Y。
+>此人对 N 个动物，用上述两种说法，一句接一句地说出 K 句话，这 K 句话有的是真的，有的是假的。
+>当一句话满足下列三条之一时，这句话就是假话，否则就是真话。
+>当前的话与前面的某些真的话冲突，就是假话；当前的话中 X 或 Y 比 N 大，就是假话；当前的话表示 X 吃 X，就是假话。
+>你的任务是根据给定的 N 和 K 句话，输出假话的总数。
+
+```cpp
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 50010;
+
+int p[N],d[N];//parent数组储存祖宗节点(该食物链顶端),distence数组储存到食物链顶端的距离
+
+int find(int x)
+{
+    if(p[x] != x)
+    {
+        int t = find(p[x]);
+        d[x] += d[p[x]];
+        p[x] = t;
+    }
+    return p[x];
+}
+
+int main()
+{
+    int n,k;
+    cin >> n >> k;
+    for(int i = 1;i <= n;i++)
+        p[i] = i;
+    int cnt = 0;
+    while(k--)
+    {
+        int t,x,y;
+        scanf("%d%d%d",&t,&x,&y);
+        if(x > n ||y > n)cnt++;
+        else 
+        {
+            int px = find(x),py = find(y);
+            if(t == 1)
+            {
+                if(p[x] == p[y] && (d[x] - d[y]) & 3)cnt++;//在一条食物链上且不是同类
+                else if(px != py)//不在一条食物链上
+                {
+                    p[p[x]] = p[y];//合并食物链
+                    d[p[x]] = d[y] - d[x];//更新到食物链顶端距离
+                }
+            }
+            else if(t == 2)
+            {
+                if(px == py && (d[x] - d[y] -1) % 3)cnt++;//在一条食物链上且不是被吃关系
+                else if(px != py)
+                {
+                    p[px] = p[y];//合并食物链
+                    d[px] = d[y] - d[x] + 1;//更新距离
+                }
+            }
+        }
+    }
+    cout << cnt <<endl;
+    return 0;
+}
+```
+
+## 模拟堆
+
+构建二叉树
+节点n的子节点是n*2和n*2+1
+父节点总是比子节点 小or大
+
+```cpp
+int h[N],cnt;
+
+void down(int x)
+{
+    int s = x;
+    if(x * 2 <= cnt && h[x*2] < h[s])
+        s = x * 2;
+    if(x * 2 + 1 <= cnt && h[x * 2 + 1] < h[s])
+        s = x * 2 + 1;
+    if(x != s)
+    {
+        swap(h[x],h[s]);
+        down(s);
+    }
+}
+void up(int x)
+{
+    int s =x / 2;
+    if(h[s] > h[x])
+    {
+        swap(h[x],h[s]);
+        x /= 2;
+        up(x);
+    }
+}
+```
+
+应用举例
+>维护一个集合，初始时集合为空，支持如下几种操作：
+>I x，插入一个数 x；
+>PM，输出当前集合中的最小值；
+>DM，删除当前集合中的最小值（数据保证此时的最小值唯一）；
+>D k，删除第 k 个插入的数；
+>C k x，修改第 k 个插入的数，将其变为 x；
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <string.h>
+
+using namespace std;
+const int N = 100010;
+
+int n;
+int h[N],ph[N],hp[N];//pointer heap数组储存第k个数对应的节点序号,heap pointer数组储存第m个节点对应的插入序号
+int cnt,idx;
+
+void heap_swap(int x,int y)//传入节点序号
+{
+    swap(ph[hp[x]],ph[hp[y]]);
+    swap(hp[x],hp[y]);
+    swap(h[x],h[y]);
+}
+
+void down(int x)
+{
+    int s = x;
+    if(x * 2 <= cnt && h[x*2] < h[s])
+        s = x * 2;
+    if(x * 2 + 1 <= cnt && h[x * 2 + 1] < h[s])
+        s = x * 2 + 1;
+    if(x != s)
+    {
+        heap_swap(h[x],h[s]);
+        down(s);
+    }
+}
+void up(int u)
+{
+     while (u / 2 && h[u] < h[u / 2])
+    {
+        heap_swap(u, u / 2);
+        u /= 2;
+    }
+}
+
+int main()
+{
+    cin >> n;
+    while(n--)
+    {
+        char op[5];
+        int k,x;
+        scanf("%s",op);
+        if(!strcmp(op,"I"))
+        {
+            scanf("%d",&x);
+            cnt++;idx++;
+            ph[idx] = cnt;
+            hp[cnt] = idx;
+            h[cnt] = x;
+            up(cnt);
+        }
+        else if(!strcmp(op,"PM"))
+            printf("%d\n",h[1]);
+        else if(!strcmp(op,"DM"))
+        {
+            heap_swap(1,cnt);
+            cnt--;
+            down(1);
+        }
+        else if(!strcmp(op,"D"))
+        {
+            scanf("%d",&k);
+            k = ph[k];
+            heap_swap(k,cnt);
+            cnt--;
+            up(k);
+            down(k);//只会执行一种
+        }
+        else if(!strcmp(op,"C"))
+        {
+            scanf("%d%d", &k, &x);
+            k = ph[k];
+            h[k] = x;
+            up(k);
+            down(k);
+        }
+    }
+    return 0;
+}
 ```
