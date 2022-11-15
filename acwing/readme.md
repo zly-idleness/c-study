@@ -20,6 +20,8 @@
     - [trie树](#trie树)
     - [并查集](#并查集)
     - [模拟堆](#模拟堆)
+    - [模拟散列表](#模拟散列表)
+    - [字符串哈希](#字符串哈希)
 
 ## 基础算法
 
@@ -841,4 +843,134 @@ int main()
     }
     return 0;
 }
+```
+
+### 模拟散列表
+
+拉链法
+
+```cpp
+
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+const int N = 100003;
+
+int h[N];
+int e[N],ne[N],idx;
+
+void insert(int x)
+{
+    int t (x % N + N) % N;
+    e[idx] = x;
+    ne[idx] = h[t];
+    h[t] = idx;
+}
+bool find(int x)
+{
+    int t = (x % N + N) % N;
+    for(int i h[t];i != -1;i = ne[i])
+        if(e[i] == x)
+            return true;
+    return false;
+}
+
+int main()
+{
+    int n;scanf("%d",&n);
+    memset (h,-1,sizeof h);
+
+    while(n--)
+    {
+        char op [2];
+        int x;
+        scanf("%s%d",op,&x);
+
+        if(*op == 'I')
+            insert(x);
+        else
+        {
+            if(find(x))
+                puts("Yes");
+            else puts("no");
+        }        
+    }
+        return 0;
+}
+```
+
+开放寻址法
+
+```cpp
+const int N= 200003;//开两到三倍,保证坑位充足
+const int null = 0x3f3f3f3f;
+
+int h[N];
+
+int find(int x)//返回应该插入的坑位序号
+{
+    int t = (x % N + N) % N;
+
+    while(h[t] != null && h[t] != x)//当前坑位有人且不是自己
+    {
+        t++;
+        if(t == N)//到尾部就从头找坑
+            t = 0;
+    }
+    return t;
+}
+void insert (int x)
+{
+    h[find(x)] = x;
+}
+
+```
+
+### 字符串哈希
+
+kmp的一种替代
+
+>给定一个长度为 n 的字符串，再给定 m 个询问，每个询问包含四个整数 l1,r1,l2,r2，请你判断 [l1,r1] 和 [l2,r2] 这两个区间所包含的字符串子串是否完全相同。
+
+```cpp
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 100010, P = 131;
+
+typedef unsigned long long ULL;
+
+char str[N];
+ULL h[N] ,p[N];//hash数组储存1-i的子串转换成P进制的数,p数组储存p的幂
+ULL get(int l,int r)
+{
+    return h[r] - h[l-1] * p[r - l + 1];//,提取p进制下第l-r位数字,等价于提取l-r的子串
+}
+
+int main ()
+{
+    scanf("%d%d%",&n,&m);
+    sacnf("%s",str + 1);
+    p[0] = 1;
+    for(int i = 0;i < n;i++)
+    {
+        h[i] = h[i - 1] * P + str[i];
+        p[i] = p[i-1] * P;
+    }
+    while(m--)
+    {
+        int l1, l2, r1, r2;
+        scanf("%d%d%d%d", &l1, &r1, &l2, &r2);
+
+        if (get(l1, r1) == get(l2, r2))
+            puts("Yes");
+        else
+            puts("No");
+    }
+    return 0;
+}
+
 ```
